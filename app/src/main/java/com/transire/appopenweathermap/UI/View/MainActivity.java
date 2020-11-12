@@ -10,20 +10,28 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.transire.appopenweathermap.R;
+import com.transire.appopenweathermap.UI.Adapter.AdapterForecast;
 import com.transire.appopenweathermap.UI.ViewModel.MainViewModel;
 import com.transire.appopenweathermap.databinding.ActivityMainBinding;
 import com.transire.appopenweathermap.databinding.ActivityMainBindingImpl;
 import com.transire.appopenweathermap.services.model.Forecast;
 import com.transire.appopenweathermap.services.model.Weather;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     private MainViewModel viewModel;;
-    private static final String URL_IMG_API_WEATHER = "http://openweathermap.org/img/w/";
     private ActivityMainBinding binding;
+    private RecyclerView mRecyclerForecastData;
+    private RecyclerView.LayoutManager layoutManager;
+    private AdapterForecast mAdapterForecast;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +39,10 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        EditText city = binding.editQuery;
 
         setComponent();
-        viewModel.getForecastData();
+        viewModel.getForecastData(city.getText().toString());
     }
 
     private void setComponent() {
@@ -43,25 +52,21 @@ public class MainActivity extends AppCompatActivity {
     private void configureObservers() {
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
-        viewModel.getData_weather().observe(
+        viewModel.data_weather.observe(
                 this,
                 this:: setForecastUI
         );
     }
 
-    private void setForecastUI(Forecast forecast) {
+    private void setForecastUI(List<Forecast> forecast) {
+        mRecyclerForecastData = binding.recyclerForecast;
+        mRecyclerForecastData.setHasFixedSize(true);
 
-        TextView data = findViewById(R.id.txt_data_forecast);
-        ImageView ico_forecast = findViewById(R.id.imageView);
+        layoutManager = new LinearLayoutManager(getApplicationContext(), RecyclerView.HORIZONTAL, false);
+        mRecyclerForecastData.setLayoutManager(layoutManager);
+        mAdapterForecast = new AdapterForecast(getApplicationContext(), viewModel.)
 
-        Double temperature = forecast.getMain().getTemp();
-        Weather weather = forecast.getWeather().get(0);
-        String icoPath = weather.getIcon();
-        Glide
-                .with(getApplicationContext())
-                .load(URL_IMG_API_WEATHER + icoPath + ".png")
-                .into(ico_forecast);
 
-        data.setText(temperature.intValue() + "º");
+
     }
 }
